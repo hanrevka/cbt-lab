@@ -3,16 +3,26 @@
 import { useState } from 'react'
 import { ModuleHeader } from '@/components/toolkit/primitives'
 import { useResolvedDeck } from '@/hooks/use-resolved-deck'
-import type { ResolvedEntry } from '@/lib/distortions'
+import { useVault } from '@/hooks/use-vault'
+import { DISTORTION_BY_ID, type ResolvedEntry } from '@/lib/distortions'
 import { ResolvedDeck } from './resolved-deck'
 import { ThoughtCard } from './thought-card'
 
 export function ReframeModule() {
   const { entries, add, remove } = useResolvedDeck()
+  const { saveLog } = useVault()
   const [cardKey, setCardKey] = useState(0)
 
   const handleResolve = (entry: ResolvedEntry) => {
     add(entry)
+
+    // Save full receipt into Vault
+    saveLog('reframe', {
+      automaticThought: entry.thought,
+      distortions: entry.distortions.map((id) => DISTORTION_BY_ID[id]?.label ?? id),
+      rationalRebuttal: entry.rational,
+    })
+
     setCardKey((k) => k + 1)
   }
 

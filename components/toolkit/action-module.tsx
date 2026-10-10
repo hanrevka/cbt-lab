@@ -3,6 +3,7 @@
 import { ArrowDown, Check, Pause, Play, RotateCcw } from 'lucide-react'
 import { useEffect, useId, useRef, useState } from 'react'
 import { useCompletions } from '@/hooks/use-completions'
+import { useVault } from '@/hooks/use-vault'
 import { tactile } from '@/lib/tactile'
 import { autoGrow } from '@/lib/textarea'
 import { cn } from '@/lib/utils'
@@ -21,6 +22,8 @@ function formatTime(ms: number) {
 
 export function ActionModule() {
   const { log } = useCompletions()
+  const { saveLog } = useVault()
+
   const ticId = useId()
   const tocId = useId()
 
@@ -42,11 +45,17 @@ export function ActionModule() {
         setTimerState('done')
         tactile('seal')
         log('action')
+
+        saveLog('action', {
+          tic: tic.trim() || 'No TIC specified',
+          toc: toc.trim() || 'No TOC specified',
+          ignitionStatus: 'Completed 3-Minute Ignition',
+        })
       }
     }, 150)
 
     return () => window.clearInterval(intervalId)
-  }, [timerState, log])
+  }, [timerState, log, saveLog, tic, toc])
 
   const handleStart = () => {
     tactile('tick')
@@ -75,15 +84,15 @@ export function ActionModule() {
         subtitle="TIC-TOC: isolate the task-interfering cognition, replace it with a task-oriented micro-action, then commit to a 3-minute physical ignition."
       />
 
-      {/* Two Stacked Textareas */}
+      {/* Two Stacked Textareas with Responsive Headers */}
       <div className="flex flex-col gap-2">
         {/* TIC Box */}
         <div className="rounded-[20px] border border-[#111111]/15 bg-white p-5 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.04)]">
-          <div className="flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.18em]">
-            <MonoLabel htmlFor={ticId} className="text-black/55">
+          <div className="flex flex-wrap items-baseline justify-between gap-1 font-mono text-[10px] uppercase tracking-[0.14em]">
+            <MonoLabel htmlFor={ticId} className="text-black/60">
               TIC &mdash; The excuse / fear
             </MonoLabel>
-            <span className="text-black/35">Interfering</span>
+            <span className="text-[9px] text-black/35">Interfering</span>
           </div>
           <textarea
             id={ticId}
@@ -96,7 +105,7 @@ export function ActionModule() {
             placeholder="I must finish the entire presentation flawlessly, so I will start tomorrow."
             className={cn(
               fieldClass,
-              'mt-3 min-h-[56px] border-0 bg-transparent p-0 text-[16px] leading-snug focus:border-0',
+              'mt-3 min-h-[56px] border-0 bg-transparent p-0 text-[15px] leading-snug focus:border-0',
             )}
           />
         </div>
@@ -110,11 +119,11 @@ export function ActionModule() {
 
         {/* TOC Box */}
         <div className="rounded-[20px] border-2 border-[#111111] bg-white p-5 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.08)]">
-          <div className="flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.18em]">
+          <div className="flex flex-wrap items-baseline justify-between gap-1 font-mono text-[10px] uppercase tracking-[0.14em]">
             <MonoLabel htmlFor={tocId} className="text-[#111111]">
-              TOC &mdash; 3-Minute microscopic action
+              TOC &mdash; 3-Minute micro action
             </MonoLabel>
-            <span className="font-semibold text-[#111111]">Oriented</span>
+            <span className="text-[9px] font-semibold text-[#111111]">Oriented</span>
           </div>
           <textarea
             id={tocId}
@@ -127,7 +136,7 @@ export function ActionModule() {
             placeholder="Open slide deck and create title for slide one."
             className={cn(
               fieldClass,
-              'mt-3 min-h-[56px] border-0 bg-transparent p-0 text-[16px] font-semibold leading-snug text-[#111111] focus:border-0',
+              'mt-3 min-h-[56px] border-0 bg-transparent p-0 text-[15px] font-semibold leading-snug text-[#111111] focus:border-0',
             )}
           />
         </div>
@@ -138,7 +147,7 @@ export function ActionModule() {
         aria-label="Ignition countdown timer"
         className="mt-6 overflow-hidden rounded-[20px] bg-[#111111] p-6 text-white shadow-[0_30px_60px_-20px_rgba(0,0,0,0.45)]"
       >
-        <div className="flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.18em] text-white/50">
+        <div className="flex flex-wrap items-center justify-between gap-1 font-mono text-[10px] uppercase tracking-[0.16em] text-white/50">
           <span>Ignition Timer</span>
           <span className="tabular-nums">
             {timerState === 'done'
@@ -159,17 +168,17 @@ export function ActionModule() {
           />
         </div>
 
-        {/* Brutalist Clock Display */}
+        {/* Clock Display */}
         <p
           role="timer"
           aria-live="off"
-          className="py-8 text-center font-mono text-[84px] font-semibold leading-none tracking-tighter tabular-nums text-white"
+          className="py-8 text-center font-mono text-[76px] sm:text-[84px] font-semibold leading-none tracking-tighter tabular-nums text-white"
         >
           {formatTime(remainingMs)}
         </p>
 
         {toc.trim() && (
-          <p className="-mt-2 mb-6 text-center font-mono text-xs uppercase tracking-[0.1em] text-white/70 text-balance">
+          <p className="-mt-2 mb-6 text-center font-mono text-[11px] uppercase tracking-[0.08em] text-white/70 text-balance">
             Target: &ldquo;{toc.trim()}&rdquo;
           </p>
         )}

@@ -198,3 +198,4 @@ function ReceiptCard({ entry }: { entry: VaultEntry }) {
     </article>
   )
 }
+export default VaultModule;

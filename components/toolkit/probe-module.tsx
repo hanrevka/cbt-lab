@@ -1,9 +1,10 @@
 'use client'
 
 import { AnimatePresence, motion } from 'framer-motion'
-import { ArrowDown, Check, CornerDownRight, RotateCcw } from 'lucide-react'
+import { ArrowDown, Check, RotateCcw } from 'lucide-react'
 import { useState } from 'react'
 import { useCompletions } from '@/hooks/use-completions'
+import { useVault } from '@/hooks/use-vault'
 import { tactile } from '@/lib/tactile'
 import { autoGrow } from '@/lib/textarea'
 import { cn } from '@/lib/utils'
@@ -24,6 +25,8 @@ type AssumptionId = (typeof SILENT_ASSUMPTIONS)[number]['id']
 
 export function ProbeModule() {
   const { log } = useCompletions()
+  const { saveLog } = useVault()
+
   const [levels, setLevels] = useState<string[]>([''])
   const [isBedrock, setIsBedrock] = useState(false)
   const [selectedAssumption, setSelectedAssumption] = useState<AssumptionId | null>(null)
@@ -55,6 +58,15 @@ export function ProbeModule() {
     tactile('seal')
     setIsConfirmed(true)
     log('probe')
+
+    const chosen = SILENT_ASSUMPTIONS.find((a) => a.id === selectedAssumption)
+
+    saveLog('probe', {
+      initialThought: levels[0].trim(),
+      descentLayers: levels.slice(1).map((l, i) => `L${i + 1}: ${l.trim()}`),
+      bedrockBelief: levels[levels.length - 1].trim(),
+      silentAssumption: chosen?.label ?? selectedAssumption,
+    })
   }
 
   const handleReset = () => {
@@ -91,10 +103,10 @@ export function ProbeModule() {
               >
                 {!isRoot && (
                   <div className="my-2.5 flex items-center gap-2 pl-4">
-                    <span className="flex size-5 items-center justify-center rounded-full bg-[#111111] text-white">
+                    <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-[#111111] text-white">
                       <ArrowDown className="size-3" aria-hidden="true" />
                     </span>
-                    <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-black/50">
+                    <span className="font-mono text-[9px] uppercase tracking-[0.12em] text-black/50">
                       {PROMPT_TEXT}
                     </span>
                   </div>
@@ -111,16 +123,16 @@ export function ProbeModule() {
                       : 'border-[#111111]/20',
                   )}
                 >
-                  <div className="flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.18em]">
+                  <div className="flex flex-wrap items-baseline justify-between gap-1 font-mono text-[10px] uppercase tracking-[0.14em]">
                     <label
                       htmlFor={`probe-input-${idx}`}
                       className={isRoot ? 'text-white/60' : 'text-black/55'}
                     >
-                      {isRoot ? 'Negative Automatic Thought' : `Subconscious Layer 0${idx}`}
+                      {isRoot ? 'Automatic Thought' : `Subconscious Layer 0${idx}`}
                     </label>
                     <span
                       className={cn(
-                        'tabular-nums',
+                        'tabular-nums text-[9px]',
                         isRoot ? 'text-white/40' : 'text-black/40',
                       )}
                     >
@@ -147,7 +159,7 @@ export function ProbeModule() {
                       autoGrow(e.currentTarget)
                     }}
                     className={cn(
-                      'mt-3 w-full resize-none overflow-hidden bg-transparent text-[16px] font-medium leading-snug tracking-tight outline-none',
+                      'mt-3 w-full resize-none overflow-hidden bg-transparent text-[15px] font-medium leading-snug tracking-tight outline-none',
                       isRoot
                         ? 'text-white placeholder:text-white/30'
                         : 'text-[#111111] placeholder:text-black/30',
@@ -189,7 +201,7 @@ export function ProbeModule() {
         </div>
       )}
 
-      {/* Bedrock Section: Silent Assumption Classification */}
+      {/* Bedrock Section */}
       <AnimatePresence>
         {isBedrock && (
           <motion.section
@@ -200,16 +212,16 @@ export function ProbeModule() {
             aria-label="Bedrock Silent Assumption"
             className="mt-8 rounded-[20px] border-2 border-[#111111] bg-white p-6 shadow-[0_8px_30px_-6px_rgba(0,0,0,0.1)]"
           >
-            <div className="flex items-center justify-between border-b border-black/10 pb-3 font-mono text-[10px] uppercase tracking-[0.18em] text-black/50">
+            <div className="flex flex-wrap items-baseline justify-between gap-1 border-b border-black/10 pb-3 font-mono text-[10px] uppercase tracking-[0.14em] text-black/50">
               <span>Bedrock Reached</span>
               <span className="font-semibold text-[#111111]">Core Schema</span>
             </div>
 
             <div className="mt-4 border-l-2 border-[#111111] pl-3.5">
-              <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-black/45">
+              <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-black/45">
                 Underlying Belief
               </span>
-              <p className="mt-1 text-[18px] font-semibold leading-snug text-[#111111]">
+              <p className="mt-1 text-[16px] font-semibold leading-snug text-[#111111]">
                 &ldquo;{levels[levels.length - 1].trim()}&rdquo;
               </p>
             </div>
@@ -239,7 +251,7 @@ export function ProbeModule() {
                       )}
                     >
                       <div className="pr-2">
-                        <div className="font-mono text-[11px] font-semibold uppercase tracking-[0.1em]">
+                        <div className="font-mono text-[10px] font-semibold uppercase tracking-[0.1em]">
                           {item.label}
                         </div>
                         <div
@@ -270,7 +282,7 @@ export function ProbeModule() {
               </BracketButton>
             ) : (
               <div className="mt-6 flex flex-col items-center gap-3">
-                <div className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.14em] text-[#111111]">
+                <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.14em] text-[#111111]">
                   <Check className="size-4" aria-hidden="true" />
                   Assumption Identified &amp; Logged
                 </div>

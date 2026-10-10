@@ -12,20 +12,8 @@ export const metadata: Metadata = {
     'Five tactile tools based on David Burns\u2019 techniques: Triple-Column Reframe, Pleasure & Procrastination Gap Tests, TIC-TOC Action, Vertical Arrow Probe, and Disarming Judo.',
   generator: 'v0.app',
   icons: {
-    icon: [
-      {
-        url: '/icon-light-32x32.png',
-        media: '(prefers-color-scheme: light)',
-      },
-      {
-        url: '/icon-dark-32x32.png',
-        media: '(prefers-color-scheme: dark)',
-      },
-      {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
-      },
-    ],
+    icon: {
+    icon: '/icon.png',
     apple: '/apple-icon.png',
   },
 }

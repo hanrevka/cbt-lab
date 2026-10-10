@@ -1,11 +1,19 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { ArrowDown, RefreshCcw, Scale, Shield, Timer, type LucideIcon } from 'lucide-react'
+import {
+  Archive,
+  ArrowDown,
+  RefreshCcw,
+  Scale,
+  Shield,
+  Timer,
+  type LucideIcon,
+} from 'lucide-react'
 import { tactile } from '@/lib/tactile'
 import { cn } from '@/lib/utils'
 
-export type TabId = 'reframe' | 'gap' | 'action' | 'probe' | 'judo'
+export type TabId = 'reframe' | 'gap' | 'action' | 'probe' | 'judo' | 'vault'
 
 export const TABS: { id: TabId; label: string; icon: LucideIcon }[] = [
   { id: 'reframe', label: 'Reframe', icon: RefreshCcw },
@@ -13,9 +21,16 @@ export const TABS: { id: TabId; label: string; icon: LucideIcon }[] = [
   { id: 'action', label: 'Action', icon: Timer },
   { id: 'probe', label: 'Probe', icon: ArrowDown },
   { id: 'judo', label: 'Judo', icon: Shield },
+  { id: 'vault', label: 'Vault', icon: Archive },
 ]
 
-export function BottomNav({ active, onSelect }: { active: TabId; onSelect: (id: TabId) => void }) {
+export function BottomNav({
+  active,
+  onSelect,
+}: {
+  active: TabId
+  onSelect: (id: TabId) => void
+}) {
   return (
     <nav
       aria-label="Techniques"
@@ -23,7 +38,7 @@ export function BottomNav({ active, onSelect }: { active: TabId; onSelect: (id: 
     >
       <div
         role="tablist"
-        className="mx-auto grid max-w-md grid-cols-5 gap-1 rounded-[22px] border border-white/10 bg-[#111111]/95 p-1.5 shadow-[0_20px_40px_-12px_rgba(0,0,0,0.5)] backdrop-blur-md"
+        className="mx-auto grid max-w-md grid-cols-6 gap-0.5 rounded-[22px] border border-white/10 bg-[#111111]/95 p-1.5 shadow-[0_20px_40px_-12px_rgba(0,0,0,0.5)] backdrop-blur-md"
       >
         {TABS.map(({ id, label, icon: Icon }) => {
           const selected = id === active
@@ -52,7 +67,7 @@ export function BottomNav({ active, onSelect }: { active: TabId; onSelect: (id: 
                 />
               )}
               <Icon className="relative size-4" aria-hidden="true" />
-              <span className="relative whitespace-nowrap font-mono text-[9px] font-semibold uppercase tracking-[0.1em]">
+              <span className="relative whitespace-nowrap font-mono text-[8px] font-semibold uppercase tracking-[0.06em]">
                 {label}
               </span>
             </button>

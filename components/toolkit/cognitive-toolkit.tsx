@@ -10,6 +10,7 @@ import { GapTestModule } from './gap-test-module'
 import { JudoModule } from './judo-module'
 import { ProbeModule } from './probe-module'
 import { TopBar } from './top-bar'
+import { VaultModule } from './vault-module'
 
 const MODULES: Record<TabId, () => React.ReactNode> = {
   reframe: () => <ReframeModule />,
@@ -17,6 +18,7 @@ const MODULES: Record<TabId, () => React.ReactNode> = {
   action: () => <ActionModule />,
   probe: () => <ProbeModule />,
   judo: () => <JudoModule />,
+  vault: () => <VaultModule />,
 }
 
 export function CognitiveToolkit() {

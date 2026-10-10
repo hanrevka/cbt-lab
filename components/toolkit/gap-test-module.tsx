@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { User, Users, X } from 'lucide-react'
 import { useId, useRef, useState } from 'react'
 import { useCompletions } from '@/hooks/use-completions'
+import { useVault } from '@/hooks/use-vault'
 import { tactile } from '@/lib/tactile'
 import { autoGrow } from '@/lib/textarea'
 import { cn } from '@/lib/utils'
@@ -67,10 +68,11 @@ const SEED_EXPERIMENTS: Experiment[] = [
 
 export function GapTestModule() {
   const { log } = useCompletions()
+  const { saveLog } = useVault()
+
   const [mode, setMode] = useState<Mode>('pleasure')
   const [experiments, setExperiments] = useState<Experiment[]>(SEED_EXPERIMENTS)
 
-  // Input area state
   const [activity, setActivity] = useState('')
   const [companion, setCompanion] = useState<Companion>('alone')
   const [predicted, setPredicted] = useState(50)
@@ -126,10 +128,21 @@ export function GapTestModule() {
     setExperiments((prev) => prev.filter((item) => item.id !== id))
   }
 
-  const handleResolveAndLog = (id: string) => {
+  const handleResolveAndLog = (exp: Experiment) => {
     tactile('seal')
     log('gap')
-    setExperiments((prev) => prev.filter((item) => item.id !== id))
+
+    const gap = exp.actual - exp.predicted
+    saveLog('gap', {
+      type: exp.mode === 'pleasure' ? 'Pleasure Prediction' : 'Anti-Procrastination',
+      activity: exp.activity,
+      companion: exp.companion ?? 'N/A',
+      [`predicted_${meta.metric.toLowerCase()}`]: `${exp.predicted}%`,
+      [`actual_${meta.metric.toLowerCase()}`]: `${exp.actual}%`,
+      gap: `${gap > 0 ? '+' : ''}${gap}%`,
+    })
+
+    setExperiments((prev) => prev.filter((item) => item.id !== exp.id))
   }
 
   return (
@@ -169,17 +182,17 @@ export function GapTestModule() {
         })}
       </div>
 
-      {/* Input Area (New Experiment) */}
+      {/* Input Area */}
       <section
         aria-label="New experiment creation"
         className="mt-6 rounded-[20px] border border-[#111111]/15 bg-white p-5 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.04)]"
       >
         <form onSubmit={handleStartExperiment} className="flex flex-col gap-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-1">
             <MonoLabel htmlFor={inputActivityId} className="text-black/55">
               Task / Activity
             </MonoLabel>
-            <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-black/35">
+            <span className="font-mono text-[9px] uppercase tracking-[0.12em] text-black/35">
               New Probe
             </span>
           </div>
@@ -194,10 +207,9 @@ export function GapTestModule() {
               autoGrow(e.currentTarget)
             }}
             placeholder={meta.placeholder}
-            className={cn(fieldClass, 'min-h-[46px] resize-none text-[16px] leading-snug')}
+            className={cn(fieldClass, 'min-h-[46px] resize-none text-[15px] leading-snug')}
           />
 
-          {/* With Whom Toggle (Pleasure Mode Only) */}
           {mode === 'pleasure' && (
             <div>
               <MonoLabel className="text-black/55">With Whom</MonoLabel>
@@ -240,13 +252,12 @@ export function GapTestModule() {
             </div>
           )}
 
-          {/* Predicted Slider */}
           <div className="mt-1">
-            <div className="mb-2 flex items-center justify-between">
+            <div className="mb-2 flex flex-wrap items-center justify-between gap-1">
               <MonoLabel className="text-black/55">
                 Predicted {meta.metric} <span className="text-black/35">(0-100%)</span>
               </MonoLabel>
-              <span className="font-mono text-sm font-semibold tabular-nums text-[#111111]">
+              <span className="font-mono text-xs font-semibold tabular-nums text-[#111111]">
                 {predicted}%
               </span>
             </div>
@@ -272,7 +283,7 @@ export function GapTestModule() {
         </form>
       </section>
 
-      {/* Active Experiments Section */}
+      {/* Active Experiments List */}
       <section aria-labelledby="active-experiments-heading" className="mt-8">
         <div className="flex items-end justify-between border-b border-[#111111] pb-3">
           <h3
@@ -304,7 +315,7 @@ export function GapTestModule() {
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1">
                         <div className="flex flex-wrap items-center gap-2">
-                          <p className="text-[17px] font-medium leading-snug tracking-tight text-[#111111]">
+                          <p className="text-[16px] font-medium leading-snug tracking-tight text-[#111111]">
                             {exp.activity}
                           </p>
                           {exp.companion && (
@@ -318,7 +329,7 @@ export function GapTestModule() {
                             </span>
                           )}
                         </div>
-                        <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.1em] text-black/45">
+                        <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.1em] text-black/45">
                           Predicted {meta.metric}:{' '}
                           <span className="font-semibold text-[#111111]">{exp.predicted}%</span>
                         </p>
@@ -334,13 +345,12 @@ export function GapTestModule() {
                       </button>
                     </div>
 
-                    {/* Actual Slider */}
                     <div className="mt-4">
-                      <div className="mb-2 flex items-center justify-between">
+                      <div className="mb-2 flex flex-wrap items-center justify-between gap-1">
                         <MonoLabel className="text-black/60">
                           Actual {meta.metric} <span className="text-black/35">(0-100%)</span>
                         </MonoLabel>
-                        <span className="font-mono text-sm font-semibold tabular-nums text-[#111111]">
+                        <span className="font-mono text-xs font-semibold tabular-nums text-[#111111]">
                           {exp.actual}%
                         </span>
                       </div>
@@ -356,13 +366,12 @@ export function GapTestModule() {
                       />
                     </div>
 
-                    {/* Gap metric & Resolve button */}
                     <div className="mt-4 flex items-center justify-between pt-1">
-                      <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-black/55">
+                      <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-black/55">
                         Gap{' '}
                         <span
                           className={cn(
-                            'text-sm font-bold tabular-nums tracking-normal',
+                            'text-xs font-bold tabular-nums tracking-normal',
                             gap === 0
                               ? 'text-black/70'
                               : gap > 0
@@ -375,7 +384,7 @@ export function GapTestModule() {
                       </p>
 
                       <BracketButton
-                        onClick={() => handleResolveAndLog(exp.id)}
+                        onClick={() => handleResolveAndLog(exp)}
                         className="h-9 px-4 text-[10px]"
                       >
                         [ RESOLVE &amp; LOG ]

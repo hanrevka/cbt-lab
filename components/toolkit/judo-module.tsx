@@ -1,9 +1,10 @@
 'use client'
 
 import { AnimatePresence, motion } from 'framer-motion'
-import { Check, Dices, RotateCcw } from 'lucide-react'
+import { Check, Dices } from 'lucide-react'
 import { useId, useState } from 'react'
 import { useCompletions } from '@/hooks/use-completions'
+import { useVault } from '@/hooks/use-vault'
 import { tactile } from '@/lib/tactile'
 import { autoGrow } from '@/lib/textarea'
 import { cn } from '@/lib/utils'
@@ -43,6 +44,7 @@ const STEPS = [
 
 export function JudoModule() {
   const { log } = useCompletions()
+  const { saveLog } = useVault()
 
   const [scenarioIndex, setScenarioIndex] = useState(0)
   const [responses, setResponses] = useState<[string, string, string]>(['', '', ''])
@@ -80,6 +82,13 @@ export function JudoModule() {
     tactile('seal')
     setIsResolved(true)
     log('judo')
+
+    saveLog('judo', {
+      hostileScenario: currentScenario,
+      step1_empathy: responses[0].trim(),
+      step2_disarm: responses[1].trim(),
+      step3_negotiate: responses[2].trim(),
+    })
   }
 
   const handleResetDrill = () => {
@@ -101,7 +110,7 @@ export function JudoModule() {
         aria-label="Hostile attack card"
         className="rounded-[20px] bg-[#111111] p-6 text-white shadow-[0_30px_60px_-20px_rgba(0,0,0,0.45)]"
       >
-        <div className="flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.18em] text-white/50">
+        <div className="flex flex-wrap items-baseline justify-between gap-1 font-mono text-[10px] uppercase tracking-[0.16em] text-white/50">
           <span>Hostile Incoming Attack</span>
           <span className="tabular-nums">
             Case {String(scenarioIndex + 1).padStart(2, '0')}/{String(HOSTILE_SCENARIOS.length).padStart(2, '0')}
@@ -117,7 +126,7 @@ export function JudoModule() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.2 }}
-            className="mt-6 text-[22px] font-semibold leading-[1.25] tracking-tight text-white text-balance"
+            className="mt-6 text-[20px] sm:text-[22px] font-semibold leading-[1.25] tracking-tight text-white text-balance"
           >
             &ldquo;{currentScenario}&rdquo;
           </motion.blockquote>
@@ -149,15 +158,16 @@ export function JudoModule() {
                 isFilled ? 'border-[#111111]' : 'border-[#111111]/15',
               )}
             >
-              <div className="flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.18em]">
-                <div className="flex items-center gap-1.5">
+              {/* Responsive Header Container */}
+              <div className="flex flex-wrap items-baseline justify-between gap-1 font-mono text-[10px] uppercase tracking-[0.14em]">
+                <div className="flex flex-wrap items-center gap-1.5">
                   <span className="font-semibold text-[#111111]">
                     Step {stepMeta.step}
                   </span>
                   <span className="text-black/35">&middot;</span>
                   <span className="text-black/60">{stepMeta.title}</span>
                 </div>
-                <span className="text-black/40">{stepMeta.rule}</span>
+                <span className="text-[9px] text-black/40">{stepMeta.rule}</span>
               </div>
 
               <MonoLabel htmlFor={inputId} className="mt-3 block text-black/55 text-pretty">
@@ -201,7 +211,7 @@ export function JudoModule() {
             animate={{ opacity: 1, y: 0 }}
             className="rounded-[20px] border-2 border-[#111111] bg-white p-6 shadow-[0_8px_30px_-6px_rgba(0,0,0,0.1)]"
           >
-            <div className="flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.18em] text-[#111111]">
+            <div className="flex flex-wrap items-baseline justify-between gap-1 font-mono text-[10px] uppercase tracking-[0.14em] text-[#111111]">
               <span className="flex items-center gap-1.5 font-semibold">
                 <Check className="size-3.5" aria-hidden="true" />
                 Disarmed &amp; Resolved
@@ -210,7 +220,7 @@ export function JudoModule() {
             </div>
 
             <div className="mt-4 border-l-2 border-[#111111] pl-3.5">
-              <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-black/40">
+              <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-black/40">
                 Full Integrated Defense
               </span>
               <p className="mt-2 text-[15px] leading-relaxed text-[#111111]">
